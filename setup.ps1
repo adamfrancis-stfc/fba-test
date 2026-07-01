@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$repo = "https://github.com/Addy010/fba-test.git"
+$repo = "https://github.com/adamfrancis-stfc/fba-test.git"
 $installDir = Join-Path "Tools" "fba-test"
 
 Write-Host ""
