@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fba-test"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "questionary",
+    "requests",
+]
+
+[tool.setuptools]
+py-modules = ["main", "config", "github"]
+
+[project.scripts]
+fba-test = "main:main"

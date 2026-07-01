@@ -1,6 +1,7 @@
 import os
 import sys
 from argparse import Namespace
+from pathlib import Path
 
 from config import load_all_apps, AppConfig
 from github import get_repo_prs, PR
@@ -46,33 +47,6 @@ def list_apps():
         apps.append(filename.replace(".json", ""))
     return apps
 
-def main(args: Namespace):
-    print()
-    if args.command == "list":
-        apps = list_apps()
-        print("===== Apps =====")
-        for app in apps:
-            print(app)
-        print()
-    elif args.command == "run":
-        app_arg = args.app
-        if app_arg:
-            if app_arg not in list_apps():
-                print(f"> Unknown app '{app_arg}'\n")
-                return
-            chosen_app = AppConfig.from_config_file(f"repos/{app_arg}.json")
-        else:
-            chosen_app = choose_app()
-        chosen_pr = choose_pr(chosen_app)
-        chosen_app.register_options()
-        chosen_app.checkout_branch(chosen_pr.branch)
-        if chosen_app.run_test():
-            print("\n> Test successful")
-        else:
-            print("\n> Test failed")
-    else:
-        print(f"> Unknown command '{args.command}'\n")
-
 def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(
         description="PR testing CLI",
@@ -109,9 +83,38 @@ def parse_args() -> Namespace:
 
     return parser.parse_args()
 
-if __name__ == '__main__':
+def main():
+    print()
+    SCRIPT_DIR = Path(__file__).parent.resolve()
+    os.chdir(SCRIPT_DIR)
     args = parse_args()
     try:
-        main(args)
+        if args.command == "list":
+            apps = list_apps()
+            print("===== Apps =====")
+            for app in apps:
+                print(app)
+            print()
+        elif args.command == "run":
+            app_arg = args.app
+            if app_arg:
+                if app_arg not in list_apps():
+                    print(f"> Unknown app '{app_arg}'\n")
+                    return
+                chosen_app = AppConfig.from_config_file(f"repos/{app_arg}.json")
+            else:
+                chosen_app = choose_app()
+            chosen_pr = choose_pr(chosen_app)
+            chosen_app.register_options()
+            chosen_app.checkout_branch(chosen_pr.branch)
+            if chosen_app.run_test():
+                print("\n> Test successful")
+            else:
+                print("\n> Test failed")
+        else:
+            print(f"> Unknown command '{args.command}'\n")
     except KeyboardInterrupt:
         sys.exit(1)
+
+if __name__ == '__main__':
+    main()
