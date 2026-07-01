@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from argparse import Namespace
 from pathlib import Path
@@ -81,6 +82,13 @@ def parse_args() -> Namespace:
         help="PR state to filter by (default: open)",
     )
 
+    # -- update --
+    subparsers.add_parser(
+        "update",
+        help="Update CLI tool",
+        description="Run the setup script to update the CLI tool",
+    )
+
     return parser.parse_args()
 
 def main():
@@ -95,6 +103,13 @@ def main():
             for app in apps:
                 print(app)
             print()
+        elif args.command == "update":
+            subprocess.run(
+                ["powershell", "-Command",
+                 "irm https://raw.githubusercontent.com/Addy010/fba-test/main/setup.ps1 | iex"],
+                check=True,
+            )
+            sys.exit(0)
         elif args.command == "run":
             app_arg = args.app
             if app_arg:
