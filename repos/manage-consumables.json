@@ -1,0 +1,111 @@
+{
+  "label": "Manage Consumables",
+  "repo": "isisbusapps/manage-consumables",
+  "cwd": "/Programming/manage-consumables",
+  "options": [
+    {
+      "key": "int_tests",
+      "label": "Integration Tests"
+    },
+    {
+      "key": "e2e_tests",
+      "label": "E2E Tests"
+    }
+  ],
+  "test": {
+    "type": "sequence",
+    "steps": [
+      {
+        "type": "concurrent",
+        "steps": [
+          {
+            "type": "sequence",
+            "steps": [
+              {
+                "type": "command",
+                "label": "Install Backend Dependencies",
+                "cwd": "/Programming/manage-consumables/backend",
+                "command": "npm install"
+              },
+              {
+                "type": "command",
+                "label": "Generate Backend Client",
+                "cwd": "/Programming/manage-consumables/backend",
+                "command": "npm run generate"
+              }
+            ]
+          },
+          {
+            "type": "sequence",
+            "steps": [
+              {
+                "type": "command",
+                "label": "Install Frontend Dependencies",
+                "cwd": "/Programming/manage-consumables/frontend",
+                "command": "npm install"
+              },
+              {
+                "type": "command",
+                "label": "Generate Frontend Client",
+                "cwd": "/Programming/manage-consumables/frontend",
+                "command": "npm run generate"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "command",
+        "label": "Run integration tests",
+        "cwd": "/Programming/manage-consumables/backend",
+        "command": "npm run test:integration",
+        "condition": "int_tests"
+      },
+      {
+        "type": "concurrent",
+        "steps": [
+          {
+            "type": "command",
+            "label": "Run Backend",
+            "cwd": "/Programming/manage-consumables/backend",
+            "command": "npm run dev",
+            "background": true,
+            "hidden": true
+          },
+          {
+            "type": "command",
+            "label": "Run Frontend",
+            "cwd": "/Programming/manage-consumables/frontend",
+            "command": "npm run dev",
+            "background": true,
+            "hidden": true
+          }
+        ]
+      },
+      {
+        "type": "concurrent",
+        "steps": [
+          {
+            "type": "command",
+            "label": "Wait for Frontend",
+            "cwd": ".",
+            "command": "npx -y wait-on http://office.localhost:6010/manage-consumables --timeout 30000"
+          },
+          {
+            "type": "command",
+            "label": "Wait for Backend",
+            "cwd": ".",
+            "command": "npx -y wait-on http://localhost:4023/manage-consumables-service/api/docs --timeout 30000"
+          }
+        ]
+      },
+      {
+        "type": "command",
+        "label": "E2E Tests",
+        "cwd": "/Programming/manage-consumables/frontend",
+        "command": "npm run cy:run-local",
+        "condition": "e2e_tests"
+      }
+    ]
+  }
+}
